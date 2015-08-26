@@ -13,18 +13,17 @@
 
 $DataStores = Get-DataStore
 
+
 forEach ($item in $DataStores) {
 
+$VMCount = Get-Datastore $item.name | Select @{N="NumVM";E={@($_ | Get-VM).Count}} | Select -ExpandProperty NumVM
 
-$VMCount = Get-Datastore $DataStores.Name | Select @{N="NumVM";E={@($_ | Get-VM).Count}}
+$DataStoreStats = Get-DataStore $item.name |  Get-View
 
-$DataStoreStats = Get-DataStore $DataStores.Name |  Get-View
+$Capacity = $DataStoreStats | select -expandproperty summary | select @{N="Capacity"; E={[math]::round($_.Capacity/1GB,2)}} | Select -ExpandProperty Capacity
+$Free = $DataStoreStats | select -expandproperty summary | select @{N="Free";E={[math]::round($_.FreeSpace/1GB,2)}} | Select -ExpandProperty Free
+$Provisioned = $DataStoreStats | select -expandproperty summary | select @{N="Provisioned"; E={[math]::round(($_.Capacity - $_.FreeSpace + $_.Uncommitted)/1GB,2) }} | Select -ExpandProperty Provisioned
 
-$Capacity = $DataStoreStats | select -expandproperty summary | select @{N="Capacity (GB)"; E={[math]::round($_.Capacity/1GB,2)}}
-$Free = $DataStoreStats | select -expandproperty summary | select @{N="Free Space (GB)";E={[math]::round($_.FreeSpace/1GB,2)}}
-$Provisioned = $DataStoreStats | select -expandproperty summary | select @{N="Provisioned (GB)"; E={[math]::round(($_.Capacity - $_.FreeSpace + $_.Uncommitted)/1GB,2) }}
-
-Write-Log -Message "$DataStores.Name,$VMCount,$Capacity,$Free,$Provisioned" -Path c:\scripts\datastores.csv
-
+Write-Log -Message "$item.name,$VMCount,$Capacity,$Free,$Provisioned" -Path c:\scripts\datastores.csv
 
 }
