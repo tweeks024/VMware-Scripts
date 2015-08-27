@@ -24,6 +24,6 @@ $Capacity = $DataStoreStats | select -expandproperty summary | select @{N="Capac
 $Free = $DataStoreStats | select -expandproperty summary | select @{N="Free";E={[math]::round($_.FreeSpace/1GB,2)}} | Select -ExpandProperty Free
 $Provisioned = $DataStoreStats | select -expandproperty summary | select @{N="Provisioned"; E={[math]::round(($_.Capacity - $_.FreeSpace + $_.Uncommitted)/1GB,2) }} | Select -ExpandProperty Provisioned
 
-Write-Log -Message "$item.name,$VMCount,$Capacity,$Free,$Provisioned" -Path c:\scripts\datastores.csv
+Write-Host "$item,$VMCount,$Capacity,$Free,$Provisioned" >> c:\scripts\datastores.csv
 
 }
